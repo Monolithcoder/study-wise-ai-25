@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, X } from "lucide-react";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ function OnboardingPage() {
   const [branch, setBranch] = useState("");
   const [semester, setSemester] = useState("");
   const [target, setTarget] = useState("120");
-  const [studyTime, setStudyTime] = useState("evening");
+  const [studyTime, setStudyTime] = useState<"morning" | "afternoon" | "evening" | "night">("evening");
   const [subjectInput, setSubjectInput] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -51,7 +51,7 @@ function OnboardingPage() {
       await saveProfile({ data: {
         fullName, college, course, branch, semester,
         dailyTargetMinutes: Number(target),
-        preferredStudyTime: studyTime as "morning" | "afternoon" | "evening" | "night",
+        preferredStudyTime: studyTime,
         subjects,
       } });
       toast.success("Your study profile is ready.");
@@ -104,6 +104,6 @@ function OnboardingPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return <label className="block space-y-2 text-sm font-medium">{label}{children}</label>;
 }

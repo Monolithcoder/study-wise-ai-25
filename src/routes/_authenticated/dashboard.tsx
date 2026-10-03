@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, BookOpen, Clock3, Play, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getStudyDashboard } from "@/lib/studytrack.functions";
+import { Input } from "@/components/ui/input";
+import { getStudyDashboard, saveStudySession } from "@/lib/studytrack.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -80,32 +81,24 @@ function DashboardPage() {
             const subject = dashboard.subjects.find((item) => item.id === session.subject_id)?.name ?? "Study session";
             return <li key={session.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div><p className="font-medium">{session.topic || subject}</p><p className="mt-1 text-xs text-muted-foreground">{subject} · {new Date(session.start_time).toLocaleDateString()}</p></div><span className="text-sm text-muted-foreground">{session.duration_minutes} min</span></li>;
           })}</ul> : <p className="mt-4 text-sm text-muted-foreground">Your first session will show up here. Start a study session when you’re ready.</p>}
-          <SessionLauncher subjects={dashboard.subjects} onSaved={() => setRefresh((value) => value + 1)} />
+          <SessionForm subjects={dashboard.subjects} onSaved={() => setRefresh((value) => value + 1)} />
         </section>
       </div>
     </main>
   );
 }
 
-function SessionLauncher({ subjects, onSaved }: { subjects: Awaited<ReturnType<typeof getStudyDashboard>>["subjects"]; onSaved: () => void }) {
-  const saveSession = useServerFn((awaitImportSaveSession));
-  return <SessionForm subjects={subjects} onSaved={onSaved} saveSession={saveSession} />;
-}
+function SessionForm({ subjects, onSaved }: { subjects: Awaited<ReturnType<typeof getStudyDashboard>>["subjects"]; onSaved: () => void }) {
+  const saveSession = useServerFn(saveStudySession);
+  const [open, setOpen] = useState(false);
+  const [topic, setTopic] = useState("");
+  const [goal, setGoal] = useState("");
+  const [duration, setDuration] = useState("25");
+  const [subjectId, setSubjectId] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-import { saveStudySession as awaitImportSaveSession } from "@/lib/studytrack.functions";
-import { useState as useFormState } from "react";
-import { Input } from "@/components/ui/input";
-
-function SessionForm({ subjects, onSaved, saveSession }: { subjects: Awaited<ReturnType<typeof getStudyDashboard>>["subjects"]; onSaved: () => void; saveSession: ReturnType<typeof useServerFn<typeof awaitImportSaveSession>> }) {
-  const [open, setOpen] = useFormState(false);
-  const [topic, setTopic] = useFormState("");
-  const [goal, setGoal] = useFormState("");
-  const [duration, setDuration] = useFormState("25");
-  const [subjectId, setSubjectId] = useFormState("");
-  const [saving, setSaving] = useFormState(false);
-  const [error, setError] = useFormState("");
-
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
     setError("");
