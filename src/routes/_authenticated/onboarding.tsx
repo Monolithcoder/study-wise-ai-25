@@ -82,7 +82,10 @@ function OnboardingPage() {
               </select>
             </Field>
             <Field label="When do you prefer to study?">
-              <select value={studyTime} onChange={(event) => setStudyTime(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground">
+              <select value={studyTime} onChange={(event) => {
+                const value = event.target.value;
+                if (value === "morning" || value === "afternoon" || value === "evening" || value === "night") setStudyTime(value);
+              }} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground">
                 <option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening</option><option value="night">Night</option>
               </select>
             </Field>
