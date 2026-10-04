@@ -121,3 +121,12 @@ export const saveStudySession = createServerFn({ method: "POST" })
     if (error) throw new Error("The study session could not be saved. Please try again.");
     return { ok: true };
   });
+
+export const updatePassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ password: z.string().min(8).max(128) }).parse(input))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.auth.updateUser({ password: data.password });
+    if (error) throw new Error("Your password could not be updated. Please try again.");
+    return { ok: true };
+  });
